@@ -1,0 +1,2 @@
+model_checkpoint_path: "F:\\Files\\Program\\py\\TensorFlow\\Model2\\Model2.ckpt"
+all_model_checkpoint_paths: "F:\\Files\\Program\\py\\TensorFlow\\Model2\\Model2.ckpt"

@@ -67,7 +67,7 @@ with tf.name_scope('Layer3'):
 			conv_result= conv_result+ tf.nn.conv2d(L2_outputs[(i+ k)%numberOfLayerNodes], L3_filters[i, k], [1, 1, 1, 1], 'SAME')+ L3_biases[i, k]
 		L3_convs.append(conv_result)
 	L3_convs= tf.stack(L3_convs)
-	L3_outputs= L3_convs
+	L3_outputs= tf.nn.softplus(L3_convs)
 
 with tf.name_scope('outputLayer3'):
 	x_wave3= tf.zeros(tf.shape(x))
@@ -80,7 +80,7 @@ with tf.name_scope('Loss3'):
 	Loss3= tf.reduce_mean(tf.abs(y- x_wave3))#+ alpha* (tf.reduce_sum(tf.square(L1_filters))+ tf.reduce_sum(tf.square(addWeight)))
 	tf.summary.scalar('Loss3', Loss3)
 
-# writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3", sess.graph)
+# writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3/summary", sess.graph)
 saver=tf.train.Saver()
 
 saver.restore(sess, 'F:\Files\Program\py\TensorFlow\Model3\Model3.ckpt')
@@ -91,22 +91,19 @@ x_singleTest= np.zeros((1, 1, dataLength, 1))
 y_singleTest= np.zeros((1, 1, dataLength, 1))
 noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
 km=1
-frequency=0.02
+frequency=0.025
 y_singleTest[0, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
-x_singleTest[0, 0, :, 0]= np.sin(km*y_singleTest[0, 0, :, 0])+ noise
 y_singleTest[0, 0, :, 0]=km* y_singleTest[0, 0, :, 0]
+x_singleTest[0, 0, :, 0]= np.sin(y_singleTest[0, 0, :, 0])
+
 
 with open('F:/Files/Program/py/TensorFlow/Model3/ori.txt', 'w') as f:
 	f.write(str(np.reshape(y_singleTest, dataLength)))
-print('Origin data:\n', np.reshape(y_singleTest, dataLength))
 with open('F:/Files/Program/py/TensorFlow/Model3/detor.txt', 'w') as f:
 	f.write(str(np.reshape(x_singleTest, dataLength)))
-print('Detor data:\n', np.reshape(x_singleTest, dataLength))
 flattenResult= tf.reshape(x_wave3, [-1])
 with open('F:/Files/Program/py/TensorFlow/Model3/calc.txt', 'w') as f:
 	f.write(str(sess.run(flattenResult, feed_dict={x: x_singleTest})))
-print('calc result:\n', sess.run(flattenResult, feed_dict={x: x_singleTest}))
-
 dataproc.dataproc()
 
-
+print('single test finished, check files for results')

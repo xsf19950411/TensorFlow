@@ -67,7 +67,7 @@ with tf.name_scope('Layer3'):
 			conv_result= conv_result+ tf.nn.conv2d(L2_outputs[(i+ k)%numberOfLayerNodes], L3_filters[i, k], [1, 1, 1, 1], 'SAME')+ L3_biases[i, k]
 		L3_convs.append(conv_result)
 	L3_convs= tf.stack(L3_convs)
-	L3_outputs= L3_convs
+	L3_outputs= tf.nn.softplus(L3_convs)
 
 with tf.name_scope('outputLayer3'):
 	x_wave3= tf.zeros(tf.shape(x))
@@ -91,22 +91,22 @@ Train_op3= opt.apply_gradients(zip(gradients3, params))
 
 init= tf.global_variables_initializer()
 merged= tf.summary.merge_all()
-writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3", sess.graph)
+writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3/summary", sess.graph)
 saver=tf.train.Saver()
 
 ###########生成数据####################
 km=1
-y_train= np.zeros((135, 1, dataLength, 1))
-x_train= np.zeros((135, 1, dataLength, 1))
+y_train= np.zeros((2*15, 1, dataLength, 1))
+x_train= np.zeros((2*15, 1, dataLength, 1))
 noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
 
-for i in range(9):             #频率范围0.01~0.05，幅度范围0.1~1.5
+for i in range(2):             #频率范围0.01~0.05，幅度范围0.1~1.5
 	for k in range(15):
 		km= 0.1 + 0.1 * k
-		frequency= 0.01 + 0.005 * i 
+		frequency= 0.02 + 0.01 * i 
 		y_train[9*i+k, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
 		y_train[9*i+k, 0, :, 0]=km* y_train[9*i+k, 0, :, 0]
-		x_train[9*i+k, 0, :, 0]= np.sin(y_train[9*i+k, 0, :, 0])+ noise
+		x_train[9*i+k, 0, :, 0]= np.sin(y_train[9*i+k, 0, :, 0])
 		
 
 
@@ -124,7 +124,7 @@ for i in range(500):
 		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
 		writer.add_summary(result, 500+ i)
 ############模型训练--第三层#################
-for i in range(10000):
+for i in range(100000):
 	sess.run(Train_op3, feed_dict={x: x_train, y: y_train})
 	if i%100 ==0:
 		result=sess.run(merged, feed_dict={x: x_train, y: y_train})

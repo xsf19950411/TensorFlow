@@ -4,4 +4,4 @@ layer nodes: 10
 noise: none
 
 train batch: 6 frequencies (0.02~0.055) *15 amplitudes(0.1~1.5) * 500 data length
-train times: 200000
+train times: 200000  

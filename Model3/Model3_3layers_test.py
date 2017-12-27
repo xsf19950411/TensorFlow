@@ -90,8 +90,8 @@ print('Model restored.')
 x_singleTest= np.zeros((1, 1, dataLength, 1))
 y_singleTest= np.zeros((1, 1, dataLength, 1))
 noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
-km=1
-frequency=0.025
+km=0.3
+frequency=0.04
 y_singleTest[0, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
 y_singleTest[0, 0, :, 0]=km* y_singleTest[0, 0, :, 0]
 x_singleTest[0, 0, :, 0]= np.sin(y_singleTest[0, 0, :, 0])

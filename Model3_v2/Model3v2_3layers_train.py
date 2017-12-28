@@ -3,7 +3,7 @@ import numpy as np
 import dataproc
 
 sess=tf.Session()
-dataLength= 500
+dataLength= 2000
 noise_amp=0.001
 
 filterWidth= 4     #HyperParameters
@@ -80,30 +80,61 @@ with tf.name_scope('Loss3'):
 	Loss3= tf.reduce_mean(tf.abs(y- x_wave3))#+ alpha* (tf.reduce_sum(tf.square(L1_filters))+ tf.reduce_sum(tf.square(addWeight)))
 	tf.summary.scalar('Loss3', Loss3)
 
-# writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3/summary", sess.graph)
+params= tf.trainable_variables()
+opt=tf.train.GradientDescentOptimizer(0.03)
+gradients1=tf.gradients(Loss1, params)
+Train_op1= opt.apply_gradients(zip(gradients1, params))
+gradients2=tf.gradients(Loss2, params)
+Train_op2= opt.apply_gradients(zip(gradients2, params))
+gradients3=tf.gradients(Loss3, params)
+Train_op3= opt.apply_gradients(zip(gradients3, params))
+
+init= tf.global_variables_initializer()
+merged= tf.summary.merge_all()
+writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3_v2/summary", sess.graph)
 saver=tf.train.Saver()
 
-saver.restore(sess, 'F:\Files\Program\py\TensorFlow\Model3\Model3.ckpt')
-print('Model restored.')
+###########生成数据####################
+km=1
+y_train= np.zeros((6*15, 1, dataLength, 1))
+x_train= np.zeros((6*15, 1, dataLength, 1))
+noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
+
+for i in range(6):             #频率范围0.01~0.05，幅度范围0.1~1.5
+	for k in range(15):
+		km= 0.1 + 0.1 * k
+		frequency= 0.02 + 0.005 * i 
+		y_train[9*i+k, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
+		y_train[9*i+k, 0, :, 0]=km* y_train[9*i+k, 0, :, 0]
+		x_train[9*i+k, 0, :, 0]= np.sin(y_train[9*i+k, 0, :, 0])
+		
+
+
+##############模型训练--第一层####################
+sess.run(init)
+for i in range(500):
+	sess.run(Train_op1, feed_dict={x: x_train, y: y_train})
+	if i%50 ==0:
+		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
+		writer.add_summary(result, i)
+############模型训练--第二层#################
+for i in range(500):
+	sess.run(Train_op2, feed_dict={x: x_train, y: y_train})
+	if i%50 ==0:
+		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
+		writer.add_summary(result, 500+ i)
+############模型训练--第三层#################
+for i in range(20000):
+	sess.run(Train_op3, feed_dict={x: x_train, y: y_train})
+	if i%100 ==0:
+		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
+		writer.add_summary(result, 1000+ i)
+		print('epoch: %d', i)
+
+savePath=saver.save(sess, 'F:\Files\Program\py\TensorFlow\Model3_v2\Model3.ckpt')
+print('Model params saved in: ', savePath)
 
 ###############单次测试##################
-x_singleTest= np.zeros((1, 1, dataLength, 1))
-y_singleTest= np.zeros((1, 1, dataLength, 1))
-noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
-km=1.3
-frequency=0.04
-y_singleTest[0, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
-y_singleTest[0, 0, :, 0]=km* y_singleTest[0, 0, :, 0]
-x_singleTest[0, 0, :, 0]= np.sin(y_singleTest[0, 0, :, 0])
+print('Training Finished!')
 
 
-with open('F:/Files/Program/py/TensorFlow/Model3/ori.txt', 'w') as f:
-	f.write(str(np.reshape(y_singleTest, dataLength)))
-with open('F:/Files/Program/py/TensorFlow/Model3/detor.txt', 'w') as f:
-	f.write(str(np.reshape(x_singleTest, dataLength)))
-flattenResult= tf.reshape(x_wave3, [-1])
-with open('F:/Files/Program/py/TensorFlow/Model3/calc.txt', 'w') as f:
-	f.write(str(sess.run(flattenResult, feed_dict={x: x_singleTest})))
-dataproc.dataproc()
-
-print('single test finished, check files for results')

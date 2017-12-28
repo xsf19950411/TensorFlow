@@ -3,7 +3,7 @@ import numpy as np
 import dataproc
 
 sess=tf.Session()
-dataLength= 500
+dataLength= 2000
 noise_amp=0.001
 
 filterWidth= 4     #HyperParameters
@@ -80,30 +80,42 @@ with tf.name_scope('Loss3'):
 	Loss3= tf.reduce_mean(tf.abs(y- x_wave3))#+ alpha* (tf.reduce_sum(tf.square(L1_filters))+ tf.reduce_sum(tf.square(addWeight)))
 	tf.summary.scalar('Loss3', Loss3)
 
-# writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3/summary", sess.graph)
+# writer= tf.summary.FileWriter("F:/Files/Program/py/TensorFlow/Model3_v2/summary", sess.graph)
 saver=tf.train.Saver()
 
-saver.restore(sess, 'F:\Files\Program\py\TensorFlow\Model3\Model3.ckpt')
+saver.restore(sess, 'F:\Files\Program\py\TensorFlow\Model3_v2\Model3.ckpt')
 print('Model restored.')
 
 ###############单次测试##################
 x_singleTest= np.zeros((1, 1, dataLength, 1))
 y_singleTest= np.zeros((1, 1, dataLength, 1))
 noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
-km=1.3
-frequency=0.04
+km=0.9
+frequency=0.026
 y_singleTest[0, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
 y_singleTest[0, 0, :, 0]=km* y_singleTest[0, 0, :, 0]
 x_singleTest[0, 0, :, 0]= np.sin(y_singleTest[0, 0, :, 0])
 
-
-with open('F:/Files/Program/py/TensorFlow/Model3/ori.txt', 'w') as f:
-	f.write(str(np.reshape(y_singleTest, dataLength)))
-with open('F:/Files/Program/py/TensorFlow/Model3/detor.txt', 'w') as f:
-	f.write(str(np.reshape(x_singleTest, dataLength)))
-flattenResult= tf.reshape(x_wave3, [-1])
-with open('F:/Files/Program/py/TensorFlow/Model3/calc.txt', 'w') as f:
-	f.write(str(sess.run(flattenResult, feed_dict={x: x_singleTest})))
-dataproc.dataproc()
-
+#############################文件操作##############################
+with open('F:/Files/Program/py/TensorFlow/Model3_v2/ori.txt', 'w') as f:
+	f.write('')
+with open('F:/Files/Program/py/TensorFlow/Model3_v2/ori.txt', 'a') as f:
+	y_reshape=np.reshape(y_singleTest, -1)
+	for i in y_reshape:
+		f.write(str(i))
+		f.write('\n')
+with open('F:/Files/Program/py/TensorFlow/Model3_v2/detor.txt', 'w') as f:
+	f.write('')
+with open('F:/Files/Program/py/TensorFlow/Model3_v2/detor.txt', 'a') as f:
+	x_reshape=np.reshape(x_singleTest, -1)
+	for i in x_reshape:
+		f.write(str(i))
+		f.write('\n')
+with open('F:/Files/Program/py/TensorFlow/Model3_v2/calc.txt', 'w') as f:
+	f.write('')
+with open('F:/Files/Program/py/TensorFlow/Model3_v2/calc.txt', 'w') as f:
+	flattenResult= tf.reshape(x_wave3, [-1])
+	for i in sess.run(flattenResult, feed_dict={x: x_singleTest}):
+		f.write(str(i))
+		f.write('\n')
 print('single test finished, check files for results')

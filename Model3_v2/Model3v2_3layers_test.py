@@ -4,7 +4,6 @@ import dataproc
 
 sess=tf.Session()
 dataLength= 2000
-noise_amp=0.001
 
 filterWidth= 4     #HyperParameters
 numberOfLayerNodes=10
@@ -38,7 +37,7 @@ with tf.name_scope('Layer2'):
 	L2_filters= tf.Variable(tf.random_normal([numberOfLayerNodes, 4, 1, filterWidth, 1, 1], stddev= 3))
 	L2_biases= tf.Variable(tf.zeros([numberOfLayerNodes, 4, 1])+ 0.1)
 	L2_convs= []
-	for i in range(numberOfLayerNodes):
+	for i in range(numberOfLayerNodes
 		for k in range(4):
 			conv_result= tf.zeros(tf.shape(x))
 			conv_result= conv_result+ tf.nn.conv2d(L1_outputs[(i+ k)%numberOfLayerNodes], L2_filters[i, k], [1, 1, 1, 1], 'SAME')+ L2_biases[i, k]
@@ -89,9 +88,8 @@ print('Model restored.')
 ###############单次测试##################
 x_singleTest= np.zeros((1, 1, dataLength, 1))
 y_singleTest= np.zeros((1, 1, dataLength, 1))
-noise= np.random.normal(loc= 0, scale= noise_amp, size=(dataLength))
-km=0.9
-frequency=0.026
+km=0.3
+frequency=0.042
 y_singleTest[0, 0, :, 0]= np.sin(2*3.14*frequency*np.linspace(0, dataLength, dataLength))
 y_singleTest[0, 0, :, 0]=km* y_singleTest[0, 0, :, 0]
 x_singleTest[0, 0, :, 0]= np.sin(y_singleTest[0, 0, :, 0])

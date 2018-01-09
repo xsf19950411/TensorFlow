@@ -117,19 +117,21 @@ for i in range(500):
 	if i%50 ==0:
 		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
 		writer.add_summary(result, i)
+		print('epoch: ', i)
 ############模型训练--第二层#################
 for i in range(500):
 	sess.run(Train_op2, feed_dict={x: x_train, y: y_train})
 	if i%50 ==0:
 		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
 		writer.add_summary(result, 500+ i)
+		print('epoch: 500+', i)
 ############模型训练--第三层#################
-for i in range(20000):
+for i in range(100000):
 	sess.run(Train_op3, feed_dict={x: x_train, y: y_train})
 	if i%100 ==0:
 		result=sess.run(merged, feed_dict={x: x_train, y: y_train})
 		writer.add_summary(result, 1000+ i)
-		print('epoch: %d', i)
+		print('epoch: 1000+', i)
 
 savePath=saver.save(sess, 'F:\Files\Program\py\TensorFlow\Model3_v2\Model3.ckpt')
 print('Model params saved in: ', savePath)

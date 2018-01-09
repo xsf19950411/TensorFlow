@@ -1,0 +1,2 @@
+model_checkpoint_path: "F:\\Files\\Program\\py\\TensorFlow\\L4_ReLU_CNN\\parameters.ckpt"
+all_model_checkpoint_paths: "F:\\Files\\Program\\py\\TensorFlow\\L4_ReLU_CNN\\parameters.ckpt"
